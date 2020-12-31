@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Astrotomic\Translatable\Translatable;
-use Carbon\Carbon;
 
 class News extends Model
 {
@@ -13,12 +14,11 @@ class News extends Model
     protected $guarded = [];
     protected $table = 'news';
     protected $translatedAttributes = ['title','description'];
-    protected $appends = ['user_image','user_name', 'snaps_count','bones_count'];
+    protected $appends = [ 'snaps_count','bones_count','user_image','user_name'];
 
     public function user(){
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class, 'owner_id');
     }
-
     public function snaps(){
         return $this->hasMany('App\Models\Snap');
     }
@@ -32,7 +32,7 @@ class News extends Model
     public function getImageAttribute($value){
         return $value ? url('/') . '/images/newsImages/' . $value : null;
     }
-
+   
     public function getSnapsCountAttribute(){
         return $this->snaps->count();
     }
@@ -47,7 +47,9 @@ class News extends Model
         return @$this->user->name;
     }
 
-
+    // public function getUserInfoAttribute(){
+    //     return $this->user;
+    // }
     // public function news_translations(){
     //     return $this->belongsTo('App\Models\NewsTranslation');
     // }

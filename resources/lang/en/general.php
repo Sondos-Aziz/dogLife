@@ -50,4 +50,7 @@ return [
       'see_all' => 'See All Notifications',
       'unreadNotifications' => 'Unread Notifications',
       'type' => 'type',
+      'like' => 'do like on post',
+      'comment' => 'comment on post',
+      'admin' => 'notification from admin',
 ];

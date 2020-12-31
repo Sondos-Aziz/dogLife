@@ -104,7 +104,7 @@
                             <div class="">
                             <a href="{{route('unreadNotifications')}}" class="nav-link ">
                                 <div>
-                                    <span class="material-icons">  notifications</span>
+                                    <span class="material-icons">  notification_important</span>
                                     <span> @lang('general.unreadNotifications')</span>
                                 </div>
                                 

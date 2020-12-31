@@ -25,11 +25,13 @@ class NewsController extends Controller
 
     public function getAllNews()
     {
-        if(auth('api')->check()==false){
-            return $this->mainResponse(false,trans('messages.unauthorized') , [],[] ,404);
-        }
-        $allNews = News::where('type', 'admin')->paginate(7)->makeHidden(['user_name', 'user_image','snaps_count','bones_count','created_at']);
-        return  $this->mainResponse(true, 'success', $allNews, [], 200);
+        // if(auth('api')->check()==false){
+        //     return $this->mainResponse(false,trans('messages.unauthorized') ,[],[] ,404);
+        // }
+        $news = News::where('type', 'admin')->paginate(7);
+        $allNews = $news->makeHidden(['user_name', 'user_image','snaps_count','bones_count','created_at']);
+        $news->allNews=$allNews;
+        return  $this->mainResponse(true,  __('messages.success'), $news, [], 200);
     }
 
     public function getAllUsersNews()
@@ -37,21 +39,22 @@ class NewsController extends Controller
         if(auth('api')->check()==false){
         return $this->mainResponse(false,trans('messages.unauthorized') , [],[] ,404);
     }
-        $allNews = News::where('type', 'user')->paginate(7)->makeVisible(['snaps_count','bones_count'])->makeHidden(['title']);
-       
-        return  $this->mainResponse(true, 'success', $allNews, [], 200);
+        $news = News::where('type', 'user')->where('owner_id',auth('api')->user()->id)->paginate(7);
+      $allNews = $news->makeVisible(['snaps_count','user_info','bones_count'])->makeHidden(['title']);
+      $news->allNews=$allNews;
+        return  $this->mainResponse(true, __('messages.success'), $news, [], 200);
     }
 
     public function details($id)
     {
-        if(auth('api')->check()==false){
-            return $this->mainResponse(false,trans('messages.unauthorized') , [],[] ,404);
-        }
+        // if(auth('api')->check()==false){
+        //     return $this->mainResponse(false,trans('messages.unauthorized') , [],[] ,404);
+        // }
         $news = News::where('type', 'user')->find($id)->makeHidden(['user_name', 'user_image','snaps_count','created_at']);
         if(!$news){
-        return  $this->mainResponse(false, 'faild', [], [], 100);
+        return  $this->mainResponse(false,  __('messages.nothing'), [], [], 100);
         }
-        return  $this->mainResponse(true, 'success', $news, [], 200);
+        return  $this->mainResponse(true,  __('messages.success'), $news, [], 200);
     }
 
     //add news
@@ -71,7 +74,7 @@ class NewsController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
         }
         $imageExtensions = ["jpg", "jpeg", "peg", "png", "gif", "svg"];
         $extension =  $request->uploadedFile->extension();
@@ -138,7 +141,7 @@ class NewsController extends Controller
          notificationForAdmin( $admin_notification->id, $request->title, $request->message, $request->message, 1);
 
          
-        return  $this->mainResponse(true, 'success', [], [], 200);
+        return  $this->mainResponse(true,  __('messages.success'), [], [], 200);
     }
 
     // add snap(comment)
@@ -154,7 +157,7 @@ class NewsController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
         }
         $data = [
 
@@ -180,7 +183,7 @@ class NewsController extends Controller
            fcmNotification($android_users, $notification->id, $request->title, $request->message, $request->message, 2, 'android');
            fcmNotification($ios_users, $notification->id, $request->title, $request->message, $request->message, 2, 'ios');
    
-        return  $this->mainResponse(true, 'success', [], [], 200);
+        return  $this->mainResponse(true,  __('messages.success'), [], [], 200);
     }
 
 
@@ -197,7 +200,7 @@ class NewsController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
         }
 
         $bone = Bone::query()->where('user_id', auth('api')->user()->id)->where('news_id', $request->news_id)->exists();
@@ -227,7 +230,7 @@ class NewsController extends Controller
                fcmNotification($ios_users, $notification->id, $request->title, $request->message, $request->message, 3, 'ios');
        
         }
-         return  $this->mainResponse(true, 'success', [], [], 200);
+         return  $this->mainResponse(true,  __('messages.success'), [], [], 200);
         // $news = News::find($request->news_id)->first();
         // $bones = $news->bones + 1; 
         // $bones_count = News::getBonesCountAttribute();

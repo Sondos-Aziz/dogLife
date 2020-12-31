@@ -8,13 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Traits\GeneralResponseTrait;
+use App\Traits\ImageTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    use GeneralResponseTrait;
+    use GeneralResponseTrait,ImageTrait;
 
     public function login(Request $request)
     {
@@ -22,13 +23,13 @@ class AuthController extends Controller
             $rules = [
                 'email' => 'required|email',
                 'password' => 'required|string|min:6',
-                'token' =>'required|unique:mobile_tokens,token',
-                'device' =>'required',
+                'fcm_token' =>'required|string|max:255',
+            'device' =>'required|in:android,ios',
             ];
             $validator = Validator::make($request->all(), $rules);
             if ($validator->fails()) {
                 //   return  $this->mainResponse(false, __('messages.error validation'), null,$validator, 001);
-                  return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+                  return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
                 }
             //login
             $credentials = $request->only(['email', 'password']);
@@ -38,9 +39,8 @@ class AuthController extends Controller
                 $user = User::query()->find(Auth::user()->id);
                 $user['token'] =  $user->createToken('MyApp')->accessToken;
                 MobileToken::query()->updateOrCreate(
-                    ['user_id' => $user->id, 'token' =>$request->token , 'device' => $request->device],
-                    ['user_id' => $user->id, 'token' => $request->token , 'device' => $request->device]
-                  );
+                    ['user_id' => $user->id, 'token' =>$request->fcm_token , 'device' => $request->device],
+                    ['user_id' => $user->id, 'token' =>$request->fcm_token , 'device' => $request->device] );
                 return  $this->mainResponse(true, __('messages.success'), $user, [], 200);
             } else {
                 return  $this->mainResponse(false, __('messages.unauthorized'), null, [], 400);
@@ -57,25 +57,26 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'c_password' => 'required|string|min:6|same:password',
-            'token' =>'required|unique:mobile_tokens,token',
-            'device' =>'required',
+            'fcm_token' =>'required|string|max:255|unique:mobile_tokens,token',
+            'device' =>'required|in:android,ios',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
 
         }
         $input = $request->all();
         $input['password'] = Hash::make($input['password']);
-        
+        // $input['image'] =  $this->saveImages('avatar.jpg', 'images/userImages/');
         $user = User::create($input);
+        $reg_user = User::query()->find($user->id);
+
         // $user->setAttribute($user->createToken('ok')->accessToken);
-        $user['token'] =  $user->createToken('MyApp')->accessToken;
+        $reg_user['token'] =  $user->createToken('MyApp')->accessToken;
         MobileToken::query()->updateOrCreate(
-            ['user_id' => $user->id, 'token' => $request->token, 'device' => $request->device],
-            ['user_id' => $user->id, 'token' =>$request->token , 'device' => $request->device]
-          );
-        return  $this->mainResponse(true, __('messages.success'), $user, [], 200);
+            ['user_id' => $user->id, 'token' => $request->fcm_token, 'device' => $request->device],
+            ['user_id' => $user->id, 'token' =>$request->fcm_token , 'device' => $request->device] );
+        return  $this->mainResponse(true, __('messages.success'), $reg_user, [], 200);
     }
 
     public function logout(Request $request)

@@ -14,6 +14,8 @@ return [
     */
     'error validation' => 'خطأ في التحقق',
     'success' => 'نجاح',
+    'nothing' => ' لا يوجد شئ للعرض',
+    'faild' =>'فشل',
     'unauthorized' => 'غير مصرح',
     'logout' => 'لقد تم تسجيل الخروج بنجاح!',
    

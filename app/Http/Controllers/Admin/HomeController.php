@@ -20,17 +20,20 @@ class HomeController extends Controller
         // return json_encode(array('data'=>$admin_notifications));
     }
 
-    //all unread notifications
-    public function allUnreadNotifications(){
-        $admin_notifications = AdminNotification::where('seen',0)->get();
-        return view('admin.notification.getUnreadNotifications',compact('admin_notifications'));
-    }
-
      // read notifications
      public function readNotifications($id){
         $admin_notifications = AdminNotification::query()->find($id);
        $admin_notifications->update(['seen' => 1]);
         return response()->json(['data' => true]);
     }
+
+    //all unread notifications
+    public function allUnreadNotifications(){
+        $admin_notifications = AdminNotification::where('seen',0)->get();
+        // return  response()->json(['data' => $admin_notifications]);      
+        return view('admin.notification.getUnreadNotifications',compact('admin_notifications'));
+    }
+
+    
     
 }

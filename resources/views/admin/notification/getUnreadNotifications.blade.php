@@ -29,7 +29,7 @@
                                         <th>{{trans('general.content')}}</th>
                                         <th>{{trans('general.type')}}</th> 
                                         <th>{{trans('general.CreatedAt')}} </th>
-                                        {{-- <th>{{trans('general.actions')}} </th> --}}
+                                        <th>{{trans('general.actions')}} </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -37,7 +37,7 @@
                                     @foreach ($admin_notifications as $notification)
                                         <tr >
                                             <td>{{ 1  }}</td>
-                                            <td> {{  $notification->user->name}}  </td>
+                                            <td> {{  $notification->name}}  </td>
                                             <td>{{  $notification->title}} </td>
                                             <td>{{  $notification->content}} </td>
                                             <td>
@@ -46,7 +46,14 @@
 									            @endif
                                             </td>
                                             <td>{{ $notification->getCreatedAtAttribute($notification->created_at) }} </td>
-                                         </tr>
+                                       <td>
+                                            <button type="button" id ="readMsg" class="btn btn-info btn-sm" data-notification_id='{{$notification->id}}' >
+                                                <i class="material-icons">done</i>
+                                            </button>
+                                       </td>
+
+
+                                        </tr>
                                     @endforeach
                                </tbody>
                       
@@ -61,6 +68,50 @@
 
     </div>
    
+    @section('script')
+        <script>
+        
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            url: "{{ route('unreadNotifications') }}" ,    
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function(dataResult){
+                console.log(dataResult);
+                var resultData = dataResult.data;
+                var bodyData = '';              
+                    var i=1;
+                $.each(resultData,function(index,row){
+                    // console.log(row.id);
+                    // alert(row.id);
+                    // alert(row.name);
+                    bodyData+=" <tr >"+" <td>{{ 1  }}</td>"+" <td>"+ row.name +"</td>"+
+                        <td>"+ row.title +"</td>"+ <td>"+ row.content +"</td>"+
+                         "<td>"+ row.name +"</td>"+
+                       " <td>"+"
+                            @if("+row.type + " == 1)"+
+                          "  @lang('general.add_post')"+
+                           " @endif"
+                          +"</td>" +
+                       " <td>"+ row.created_at +"</td>"+
+                      "<td>"+
+                       '<button type="button" id ="readMsg" class="btn btn-info btn-sm" data-notification_id="'+row.id+ "'>" +
+                          '<i class="material-icons">done</i>'+"</button>"
+                      " </td>"+
+                      "</tr>"
+                      
+                });
+                $("#bodyData").append(bodyData);
+            
+            }, error: function (reject) {
+                console.log('error');
+            }
+        });
+        </script>  
+    @endsection
+            
 
     <!--  END CONTENT AREA  -->
-@endsection
+@stop

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Rules\MatchOldPassword;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use App\Models\Snap;
 use App\Traits\GeneralResponseTrait;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -31,11 +32,11 @@ class UserController extends Controller
             'name' => 'nullable',
             'email' => 'email|unique:users,email,'.$user->id,
             'mobile' => 'nullable|between:8,14',
-            'image' => 'image|mimes:peg,png,jpeg,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:peg,png,jpeg,jpg,gif,svg|max:2048',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
         }
         $oldImage = "images/userImages/" . $user->image;
         if (File::exists($oldImage)) {
@@ -71,7 +72,7 @@ class UserController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages());
+            return $this->mainResponse(false, $validator->errors()->first(), [], $validator->errors()->messages(),101);
         }
         $data = [
             'password' => Hash::make($request->new_password),
@@ -87,12 +88,12 @@ class UserController extends Controller
     {
         $rules = [
             'name' => 'required|string',
-            'email' => 'required|string|unique:contacts,email',
+            'email' => 'required|string',
             'message' => 'required|string',
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), null, $validator->errors(), 200);
+            return $this->mainResponse(false, $validator->errors()->first(), null, $validator->errors(), 101);
         }
 
         $data = [
@@ -117,7 +118,7 @@ class UserController extends Controller
         ];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return $this->mainResponse(false, $validator->errors()->first(), null, $validator->errors(), 200);
+            return $this->mainResponse(false, $validator->errors()->first(), null, $validator->errors(), 101);
         }
 
         $news  = News::query()->leftjoin('news_translations', 'news.id', '=', 'news_translations.news_id')
@@ -142,6 +143,20 @@ class UserController extends Controller
 
         $notifications = Notification::where('user_id',auth('api')->user()->id)->orderBy('id', 'desc')->get();
         return $this->mainResponse(true, trans('messages.notifications'), $notifications, [], 200);
+
+    }
+
+    //get the like post for user
+    public function getLikePosts(){
+        if(auth('api')->check()==false){
+            return $this->mainResponse(false,trans('messages.unauthorized') , [],[] ,404);
+        }
+
+        $likes = Snap::where('user_id',auth('api')->user()->id)->orderBy('id', 'desc')->get();
+        if($likes != null)
+        return $this->mainResponse(true, trans('messages.notifications'), $likes, [], 200);
+        else
+        return $this->mainResponse(true, trans('messages.nothing'), $likes, [], 200);
 
     }
 }

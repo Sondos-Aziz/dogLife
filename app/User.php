@@ -19,6 +19,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password','image','mobile',
     ];
+    // protected $appends = [ 'default_image' ];
 
     public function news(){
         return $this->hasMany('App\Models\News');
@@ -57,6 +58,7 @@ class User extends Authenticatable
     ];
 
     public function getImageAttribute($value){
-        return $value ? url('/') . '/images/userImages/' . $value : null;
+        return $value ? url('/') . '/images/userImages/' . $value :  url('/'). '/images/userImages/avatar.jpg';
     }
+    
 }

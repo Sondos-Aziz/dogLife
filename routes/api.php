@@ -23,7 +23,7 @@ Route::group(['namespace' => 'API'], function(){
 
     Route::post('login', [AuthController::class,'login']);
     Route::post('register', [AuthController::class,'register']);
-    Route::post('logout', [AuthController::class,'logout']);
+    Route::post('logout', [AuthController::class,'logout'])->middleware('auth:api');
 
     Route::post('forget-password-email', [PasswordResetController::class,'forgetPasswordEmail']);
     Route::post('verify_code_email', [PasswordResetController::class,'verifyCodeFromEmail']);
@@ -49,7 +49,9 @@ Route::group(['namespace' => 'API'], function(){
     Route::post('add_comments' ,[NewsController::class,'storeSnap']);
     Route::post('like_news' ,[NewsController::class,'likeNews']);
 
-    Route::get('user_notifications' ,[UserController::class,'getNotifications']);
+    Route::get('get_user_notifications' ,[UserController::class,'getNotifications']);
+    Route::get('get_user_likes' ,[UserController::class,'getLikePosts']);
+
 });
 
 //user

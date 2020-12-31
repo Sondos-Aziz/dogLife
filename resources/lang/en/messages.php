@@ -15,6 +15,7 @@ return [
 
     'error validation' => 'Error Validation',
     'success' => 'Success',
+    'nothing' =>'Nothing to display',
     'unauthorized' => 'Unauthorized',
     'logout' => 'You have been successfully logged out!',
    
